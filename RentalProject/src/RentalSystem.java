@@ -1,4 +1,6 @@
 import java.util.List;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
@@ -17,16 +19,19 @@ public static RentalSystem getInstance() {
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
+        saveVehicle(vehicle); // Add this
     }
 
     public void addCustomer(Customer customer) {
         customers.add(customer);
+        saveCustomer(customer); // add this
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.AVAILABLE) {
             vehicle.setStatus(Vehicle.VehicleStatus.RENTED);
             rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, amount, "RENT"));
+            saveRecord(new RentalRecord ( vehicle, customer,date,amount,"RENT"));// ADD THIS
             System.out.println("Vehicle rented to " + customer.getCustomerName());
         }
         else {
@@ -83,5 +88,31 @@ public static RentalSystem getInstance() {
             if (c.getCustomerId() == Integer.parseInt(id))
                 return c;
         return null;
+    }
+ // 🔵 Save a vehicle to vehicles.txt
+    public void saveVehicle(Vehicle vehicle) {
+        try (FileWriter writer = new FileWriter("vehicles.txt", true)) { // true = append mode
+            writer.write(vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + vehicle.getStatus() + System.lineSeparator());
+        } catch (IOException e) {
+            System.out.println("Error saving vehicle: " + e.getMessage());
+        }
+    }
+
+    // 🔵 Save a customer to customers.txt
+    public void saveCustomer(Customer customer) {
+        try (FileWriter writer = new FileWriter("customers.txt", true)) {
+            writer.write(customer.getCustomerId() + "," + customer.getCustomerName() + System.lineSeparator());
+        } catch (IOException e) {
+            System.out.println("Error saving customer: " + e.getMessage());
+        }
+    }
+
+    // 🔵 Save a rental record to rental_records.txt
+    public void saveRecord(RentalRecord record) {
+        try (FileWriter writer = new FileWriter("rental_records.txt", true)) {
+            writer.write(record.toString() + System.lineSeparator());
+        } catch (IOException e) {
+            System.out.println("Error saving rental record: " + e.getMessage());
+        }
     }
 }
