@@ -3,12 +3,21 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
 
 public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
 private static RentalSystem instance = null; // PRIVATE SINGLETON VARIABLE
+
+//PRIVATE CONSTRUCTOR
+private RentalSystem() {
+loadData(); 
+}
+
 // INTRODUCING getInstance()
 public static RentalSystem getInstance() {
 	if ( instance == null) {
@@ -113,6 +122,44 @@ public static RentalSystem getInstance() {
             writer.write(record.toString() + System.lineSeparator());
         } catch (IOException e) {
             System.out.println("Error saving rental record: " + e.getMessage());
+        }
+    }
+    
+    private void loadData() {
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("vehicles.txt"));
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                if (parts.length >= 5) {
+                    Vehicle v = new Car(parts[1], parts[2], Integer.parseInt(parts[3]), 4);
+                    v.setLicensePlate(parts[0]);
+                    v.setStatus(Vehicle.VehicleStatus.valueOf(parts[4]));
+                    vehicles.add(v);
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("No vehicles loaded.");
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("customers.txt"));
+            for (String line : lines) {
+                String[] parts = line.split(",");
+                if (parts.length >= 2) {
+                    customers.add(new Customer(Integer.parseInt(parts[0]), parts[1]));
+                }
+            }
+        } catch (Exception e) {
+            System.out.println("No customers loaded.");
+        }
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get("rental_records.txt"));
+            for (String line : lines) {
+               
+            }
+        } catch (Exception e) {
+            System.out.println("No rental records loaded.");
         }
     }
 }
