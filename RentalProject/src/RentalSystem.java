@@ -8,8 +8,8 @@ public class RentalSystem {
     private List<Vehicle> vehicles = new ArrayList<>();
     private List<Customer> customers = new ArrayList<>();
     private RentalHistory rentalHistory = new RentalHistory();
-private static RentalSystem instance = null;
-
+private static RentalSystem instance = null; // PRIVATE SINGLETON VARIABLE
+// INTRODUCING getInstance()
 public static RentalSystem getInstance() {
 	if ( instance == null) {
 			instance = new RentalSystem ();
@@ -19,12 +19,12 @@ public static RentalSystem getInstance() {
 
     public void addVehicle(Vehicle vehicle) {
         vehicles.add(vehicle);
-        saveVehicle(vehicle); // Add this
+        saveVehicle(vehicle); 
     }
 
     public void addCustomer(Customer customer) {
         customers.add(customer);
-        saveCustomer(customer); // add this
+        saveCustomer(customer); 
     }
 
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
@@ -89,7 +89,7 @@ public static RentalSystem getInstance() {
                 return c;
         return null;
     }
- // 🔵 Save a vehicle to vehicles.txt
+ //  Save a vehicle to vehicles.txt
     public void saveVehicle(Vehicle vehicle) {
         try (FileWriter writer = new FileWriter("vehicles.txt", true)) { // true = append mode
             writer.write(vehicle.getLicensePlate() + "," + vehicle.getMake() + "," + vehicle.getModel() + "," + vehicle.getYear() + "," + vehicle.getStatus() + System.lineSeparator());
@@ -98,7 +98,7 @@ public static RentalSystem getInstance() {
         }
     }
 
-    // 🔵 Save a customer to customers.txt
+    //  Save a customer to customers.txt
     public void saveCustomer(Customer customer) {
         try (FileWriter writer = new FileWriter("customers.txt", true)) {
             writer.write(customer.getCustomerId() + "," + customer.getCustomerName() + System.lineSeparator());
@@ -107,7 +107,7 @@ public static RentalSystem getInstance() {
         }
     }
 
-    // 🔵 Save a rental record to rental_records.txt
+    // Save a rental record to rental_records.txt
     public void saveRecord(RentalRecord record) {
         try (FileWriter writer = new FileWriter("rental_records.txt", true)) {
             writer.write(record.toString() + System.lineSeparator());
