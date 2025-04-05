@@ -26,16 +26,25 @@ public static RentalSystem getInstance() {
 		return instance;
 	}
 
-    public void addVehicle(Vehicle vehicle) {
-        vehicles.add(vehicle);
-        saveVehicle(vehicle); 
+public boolean addVehicle(Vehicle vehicle) {
+    if (findVehicleByPlate(vehicle.getLicensePlate()) != null) {
+        System.out.println("Vehicle with plate " + vehicle.getLicensePlate() + " already exists. Not added.");
+        return false;
     }
+    vehicles.add(vehicle);
+    saveVehicle(vehicle);
+    return true;
+}
 
-    public void addCustomer(Customer customer) {
-        customers.add(customer);
-        saveCustomer(customer); 
+public boolean addCustomer(Customer customer) {
+    if (findCustomerById(String.valueOf(customer.getCustomerId())) != null) {
+        System.out.println("Customer with ID " + customer.getCustomerId() + " already exists. Not added.");
+        return false;
     }
-
+    customers.add(customer);
+    saveCustomer(customer);
+    return true;
+}
     public void rentVehicle(Vehicle vehicle, Customer customer, LocalDate date, double amount) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.AVAILABLE) {
             vehicle.setStatus(Vehicle.VehicleStatus.RENTED);
@@ -50,8 +59,10 @@ public static RentalSystem getInstance() {
 
     public void returnVehicle(Vehicle vehicle, Customer customer, LocalDate date, double extraFees) {
         if (vehicle.getStatus() == Vehicle.VehicleStatus.RENTED) {
-            vehicle.setStatus(Vehicle.VehicleStatus.AVAILABLE);
-            rentalHistory.addRecord(new RentalRecord(vehicle, customer, date, extraFees, "RETURN"));
+        	vehicle.setStatus(Vehicle.VehicleStatus.AVAILABLE);
+            RentalRecord record = new RentalRecord(vehicle, customer, date, extraFees, "RETURN");
+            rentalHistory.addRecord(record);
+            saveRecord(record);
             System.out.println("Vehicle returned by " + customer.getCustomerName());
         }
         else {
@@ -156,10 +167,43 @@ public static RentalSystem getInstance() {
         try {
             List<String> lines = Files.readAllLines(Paths.get("rental_records.txt"));
             for (String line : lines) {
-               
+            	String[] parts = line.split("\\|");
+                if (parts.length >= 5) {
+                    String plate = parts[1].split(":")[1].trim();
+                    String customerName = parts[2].split(":")[1].trim();
+                    String date = parts[3].split(":")[1].trim();
+                    String amount = parts[4].split(":")[1].trim().replace("$", "");
+
+                    Vehicle vehicle = findVehicleByPlate(plate);
+                    Customer customer = findCustomerByName(customerName);
+
+                    if (vehicle != null && customer != null) {
+                        RentalRecord record = new RentalRecord(
+                            vehicle,
+                            customer,
+                            LocalDate.parse(date),
+                            Double.parseDouble(amount),
+                            parts[0].trim() // RENT or RETURN
+                        );
+                        rentalHistory.addRecord(record);       
+                    }
+                }
             }
-        } catch (Exception e) {
+        }
+         catch (Exception e) {
             System.out.println("No rental records loaded.");
         }
+        
+        
+       
+        }
+    public Customer findCustomerByName(String name) {
+        for (Customer c : customers) {
+            if (c.getCustomerName().equalsIgnoreCase(name)) {
+                return c;
+            }
+        }
+        return null;
     }
-}
+
+    }
